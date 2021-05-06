@@ -735,18 +735,20 @@ void ImageViewer::prepocitajSuradnice() {
 		suradniceRovnobezne();
 	else if (kamera.getTyp() == 1)
 		suradniceStredove();
-	getCurrentViewerWidget()->kresliHedron(naVykreslenie, nevykresluj, farby, ui->algo->currentIndex());
+	getCurrentViewerWidget()->kresliHedron(naVykreslenie, nevykresluj, farby, ui->algo->currentIndex(), zSur);
 }
 
 void ImageViewer::suradniceRovnobezne() {
 	qDebug() << "snaha rovnobezne";
 	naVykreslenie.clear();
 	farby.clear();
+	zSur.clear();
 	nevykresluj.clear();
+	QVector<double> surZ(3);
 	double a = kamera.getnx(), b = kamera.getny(), c = kamera.getnz();
 	double ux = kamera.getux(), uy = kamera.getuy(), uz = kamera.getuz();
 	double vx = kamera.getvx(), vy = kamera.getvy(), vz = kamera.getvz();
-	double stareX, stareY, stareZ, x, z, y, xx, yy, dist;
+	double stareX, stareY, stareZ, x, z, y, xx, yy, dist, pomocna;
 	int zoom = ui->zoom->value();
 	QPointF bod;
 	for (int i = 0; i < octa.getStenysize(); i++){
@@ -754,6 +756,7 @@ void ImageViewer::suradniceRovnobezne() {
 		stareX = octa.getStena(i)->getEdge()->getVertexO()->getX();
 		stareY = octa.getStena(i)->getEdge()->getVertexO()->getY();
 		stareZ = octa.getStena(i)->getEdge()->getVertexO()->getZ();
+		surZ[0] = stareZ;											
 
 		dist = sqrt((stareX * zoom - a * zoom) * (stareX - a * zoom) + (stareY * zoom - b * zoom) * (stareY * zoom - b * zoom) + (stareZ * zoom - c * zoom) * (stareZ * zoom - c * zoom));
 		if (dist<ui->spinNear->value() || dist>ui->spinFar->value()) {
@@ -775,6 +778,7 @@ void ImageViewer::suradniceRovnobezne() {
 		stareX = octa.getStena(i)->getEdge()->getHrana_next()->getVertexO()->getX();
 		stareY = octa.getStena(i)->getEdge()->getHrana_next()->getVertexO()->getY();
 		stareZ = octa.getStena(i)->getEdge()->getHrana_next()->getVertexO()->getZ();
+		surZ[1] = stareZ;
 
 		dist = sqrt((stareX * zoom - a * zoom) * (stareX - a * zoom) + (stareY * zoom - b * zoom) * (stareY * zoom - b * zoom) + (stareZ * zoom - c * zoom) * (stareZ * zoom - c * zoom));
 		if (dist<ui->spinNear->value() || dist>ui->spinFar->value()) {
@@ -796,6 +800,7 @@ void ImageViewer::suradniceRovnobezne() {
 		stareX = octa.getStena(i)->getEdge()->getHrana_next()->getHrana_next()->getVertexO()->getX();
 		stareY = octa.getStena(i)->getEdge()->getHrana_next()->getHrana_next()->getVertexO()->getY();
 		stareZ = octa.getStena(i)->getEdge()->getHrana_next()->getHrana_next()->getVertexO()->getZ();
+		surZ[2] = stareZ;
 
 		dist = sqrt((stareX * zoom - a * zoom) * (stareX - a * zoom) + (stareY * zoom - b * zoom) * (stareY * zoom - b * zoom) + (stareZ * zoom - c * zoom) * (stareZ * zoom - c * zoom));
 		if (dist<ui->spinNear->value() || dist>ui->spinFar->value()) {
@@ -812,6 +817,13 @@ void ImageViewer::suradniceRovnobezne() {
 		bod.setY(zoom * yy + getCurrentViewerWidget()->getImgHeight() / 2 - ui->verticalSlider->value());
 		naVykreslenie.append(bod);
 		farby.append(octa.getStena(i)->getEdge()->getHrana_next()->getHrana_next()->getVertexO()->getFarba());
+		if (surZ[0] > surZ[1])		// najdem navyssiu z suradnicu a do Z-bufferu ju zapisem vramci celeho trojuholnika resp n-uholnika aby mi nebezali vypocty pre kazdy pixel
+			pomocna = surZ[0];
+		else
+			pomocna = surZ[1];
+		if (surZ[2] > pomocna)
+			pomocna = surZ[2];
+		zSur.append(pomocna);
 	}
 }
 
@@ -819,6 +831,7 @@ void ImageViewer::suradniceStredove() {
 	qDebug() << "snaha stredove";
 	naVykreslenie.clear();
 	farby.clear();
+	zSur.clear();
 	nevykresluj.clear();
 	double a = kamera.getnx(), b = kamera.getny(), c = kamera.getnz();
 	double stareX, stareY, stareZ, x, z, y, xx, yy, Sx, Sy, Sz, t, dist;
@@ -835,6 +848,7 @@ void ImageViewer::suradniceStredove() {
 		stareX = octa.getStena(i)->getEdge()->getVertexO()->getX();
 		stareY = octa.getStena(i)->getEdge()->getVertexO()->getY();
 		stareZ = octa.getStena(i)->getEdge()->getVertexO()->getZ();
+		zSur.append(stareZ);
 
 		dist = sqrt((stareX * zoom - a * zoom) * (stareX - a * zoom) + (stareY * zoom - b * zoom) * (stareY * zoom - b * zoom) + (stareZ * zoom - c * zoom) * (stareZ * zoom - c * zoom));
 		if (dist<ui->spinNear->value() || dist>ui->spinFar->value()) {
@@ -964,23 +978,26 @@ void ImageViewer::farbyCalc() {
 														qDebug() << "Ia " << Ia;*/
 		//vypocet I
 		a = Ia.redF() + Id.redF() + Is.redF();
-		I.setRed(round(a));								//qDebug() << a << I.red();
-		if (I.red() < 0)
+		if (a < 0)
 			I.setRed(0);
-		else if (I.red() > 255)
+		else if (a > 255)
 			I.setRed(255);
+		else	
+			I.setRed(round(a));							//qDebug() << a << I.red();
 		a = Ia.greenF() + Id.greenF() + Is.greenF();	//qDebug() << a;
-		I.setGreen(round(a));
-		if (I.green() < 0)
+		if (a < 0)
 			I.setGreen(0);
-		else if (I.green() > 255)
+		else if (a > 255)
 			I.setGreen(255);
+		else
+			I.setGreen(round(a));						//qDebug() << a << I.green();
 		a = Ia.blueF() + Id.blueF() + Is.blueF();		//qDebug() << a;
-		I.setBlue(round(a));
-		if (I.blue() < 0)
+		if (a < 0)
 			I.setBlue(0);
-		else if (I.blue() > 255)
+		else if (a > 255)
 			I.setBlue(255);
+		else
+			I.setBlue(round(a));						//qDebug() << a << I.blue();
 		(*Vrcholy)[i].setFarba(I);
 														//qDebug()<<"vysledne I" << I;
 	}

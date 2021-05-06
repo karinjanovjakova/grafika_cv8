@@ -1,5 +1,12 @@
 #pragma once
 #include <QtWidgets>
+
+struct zBuff {
+	double z;
+	QColor farbaPixelu;
+};
+
+
 class ViewerWidget :public QWidget {
 	Q_OBJECT
 private:
@@ -29,12 +36,17 @@ public:
 	QPoint getFreeDrawBegin() { return freeDrawBegin; }
 	void setFreeDrawActivated(bool state) { freeDrawActivated = state; }
 	bool getFreeDrawActivated() { return freeDrawActivated; }
+
+	QVector<QVector<zBuff>> buffer;
 	void usecka_DDA(QPointF A, QPointF B, QColor color);
-	void kresliHedron(QList<QPointF> naVykreslenie, QList<int> nevykresluj, QList<QColor> farby, int algovypln);
+	void kresliHedron(QList<QPointF> naVykreslenie, QList<int> nevykresluj, QList<QColor> farby, int algovypln, QList<double> zSur);
 	QColor bary(int x, int y, QList<QPointF> body, QList<QColor> farby);
 	QColor nearest(int x, int y, QList<QPointF> body, QList<QColor> farby);
-	void scanLineTri(QList <QPointF> body, QColor vypln, int algovypln, QList<QColor> farby);
-	void vyfarbi();
+	void scanLineTri(QList <QPointF> body, int algovypln, QList<QColor> farby, double z);
+	void scanLine(QList <QPointF> body, QColor vypln, double z);
+	void resetZbuff();
+	void setZbuff(int x, int y, QColor farba, double z);
+	void kresliZbuff();
 
 	//Data functions
 	QRgb* getData() { return data; }

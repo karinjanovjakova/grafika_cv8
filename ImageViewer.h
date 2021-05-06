@@ -54,6 +54,7 @@ private:
 	QList<QPointF> naVykreslenie;
 	QList<QColor> farby;
 	QList<int> nevykresluj;
+	QList<double> zSur;
 	void prepocitajSuradnice();
 	void suradniceRovnobezne();
 	void suradniceStredove();

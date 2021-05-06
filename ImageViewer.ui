@@ -76,7 +76,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="Lx"/>
+           <widget class="QSpinBox" name="Lx">
+            <property name="maximum">
+             <number>500</number>
+            </property>
+           </widget>
           </item>
           <item>
            <spacer name="horizontalSpacer_16">
@@ -99,7 +103,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="Ly"/>
+           <widget class="QSpinBox" name="Ly">
+            <property name="maximum">
+             <number>500</number>
+            </property>
+           </widget>
           </item>
           <item>
            <spacer name="horizontalSpacer_17">
@@ -122,7 +130,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="Lz"/>
+           <widget class="QSpinBox" name="Lz">
+            <property name="maximum">
+             <number>500</number>
+            </property>
+           </widget>
           </item>
           <item>
            <spacer name="horizontalSpacer_18">

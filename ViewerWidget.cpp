@@ -168,12 +168,12 @@ void ViewerWidget::usecka_DDA(QPointF A, QPointF B, QColor color) {
 	update();
 }
 
-void ViewerWidget::scanLineTri(QList <QPointF> body, QColor vypln, int algovypln, QList<QColor> farby) {
+void ViewerWidget::scanLineTri(QList <QPointF> body, int algovypln, QList<QColor> farby, double z) {
 	//QVector<edge> hrany (3);
 																//usporiadanie pola bodov
 	int i, j, k, y = 0, Ymax = 0;
 	float Xmin = 0, Xmax = 0, m;
-	qDebug() << body;
+	//qDebug() << body;
 	for (i = 0; i < 3; i++) {
 		for (j = 0; j < 2; j++) {
 			if (body[j].y() > body[j + 1].y()) {
@@ -190,7 +190,7 @@ void ViewerWidget::scanLineTri(QList <QPointF> body, QColor vypln, int algovypln
 			}
 		}
 	}
-	qDebug() << body;
+	//qDebug() << body;
 	QVector<QPointF> e1(2), e2(2);								//vytvorenie "podtrojuholnikov"
 	float w1, w2;
 	bool ibajeden = false;
@@ -257,10 +257,12 @@ void ViewerWidget::scanLineTri(QList <QPointF> body, QColor vypln, int algovypln
 			while (y < Ymax) {														//kreslenie dolneho
 				for (i = 1; i <= dx; i++) {
 					if (algovypln == 0) {				//nearest neighbor
-						setPixel((int)Xmin + i, (int)y, nearest(int(Xmin) + i, (int)y, body, farby));
+						//setPixel((int)Xmin + i, (int)y, nearest(int(Xmin) + i, (int)y, body, farby));
+						setZbuff((int)Xmin + i, (int)y, nearest(int(Xmin) + i, (int)y, body, farby), z);
 					}
 					else if (algovypln == 1) {			//barycentric
-						setPixel((int)Xmin + i, (int)y, bary(int(Xmin) + i, (int)y, body, farby));
+						//setPixel((int)Xmin + i, (int)y, bary(int(Xmin) + i, (int)y, body, farby));
+						setZbuff((int)Xmin + i, (int)y, bary(int(Xmin) + i, (int)y, body, farby), z);
 					}
 				}
 				Xmin += w3;
@@ -308,10 +310,12 @@ void ViewerWidget::scanLineTri(QList <QPointF> body, QColor vypln, int algovypln
 				for (i = 1; i <= dx; i++) {
 					
 					if (algovypln == 0) {				//nearest neighbor
-						setPixel((int)Xmin + i, y, nearest(int(Xmin) + i, y, body, farby));
+						//setPixel((int)Xmin + i, (int)y, nearest(int(Xmin) + i, (int)y, body, farby));
+						setZbuff((int)Xmin + i, (int)y, nearest(int(Xmin) + i, (int)y, body, farby), z);
 					}
 					else if (algovypln == 1) {			//barycentric
-						setPixel((int)Xmin + i, y, bary(int(Xmin) + i, y, body, farby));
+						//setPixel((int)Xmin + i, y, bary(int(Xmin) + i, y, body, farby));
+						setZbuff((int)Xmin + i, (int)y, bary(int(Xmin) + i, (int)y, body, farby), z);
 					}
 				}
 				Xmin += w3;
@@ -335,10 +339,12 @@ void ViewerWidget::scanLineTri(QList <QPointF> body, QColor vypln, int algovypln
 		while (y < Ymax) {														//kreslenie dolneho	
 			for (i = 1; i <= dx; i++) {
 				if (algovypln == 0) {				//nearest neighbor
-					setPixel((int)Xmin + i, y, nearest(int(Xmin) + i, y, body, farby));
+					//setPixel((int)Xmin + i, (int)y, nearest(int(Xmin) + i, (int)y, body, farby));
+					setZbuff((int)Xmin + i, (int)y, nearest(int(Xmin) + i, (int)y, body, farby), z);
 				}
 				else if (algovypln == 1) {			//barycentric
-					setPixel((int)Xmin + i, y, bary(int(Xmin) + i, y, body, farby));
+					//setPixel((int)Xmin + i, y, bary(int(Xmin) + i, y, body, farby));
+					setZbuff((int)Xmin + i, (int)y, bary(int(Xmin) + i, (int)y, body, farby), z);
 				}
 			}
 			Xmin += w1;
@@ -358,10 +364,12 @@ void ViewerWidget::scanLineTri(QList <QPointF> body, QColor vypln, int algovypln
 		while (y < Ymax) {
 			for (i = 1; i <= dx; i++) {
 				if (algovypln == 0) {				//nearest neighbor
-					setPixel((int)Xmin + i, y, nearest(int(Xmin) + i, y, body, farby));
+					//setPixel((int)Xmin + i, (int)y, nearest(int(Xmin) + i, (int)y, body, farby));
+					setZbuff((int)Xmin + i, (int)y, nearest(int(Xmin) + i, (int)y, body, farby), z);
 				}
 				else if (algovypln == 1) {			//barycentric
-					setPixel((int)Xmin + i, y, bary(int(Xmin) + i, y, body, farby));
+					//setPixel((int)Xmin + i, y, bary(int(Xmin) + i, y, body, farby));
+					setZbuff((int)Xmin + i, (int)y, bary(int(Xmin) + i, (int)y, body, farby), z);
 
 				}
 			}
@@ -370,6 +378,116 @@ void ViewerWidget::scanLineTri(QList <QPointF> body, QColor vypln, int algovypln
 			y++;
 			dx = Xmax - Xmin;
 		}
+	}
+}
+
+void ViewerWidget::scanLine(QList <QPointF> body, QColor vypln, double z) {
+	struct edge {
+		float xs, xk, ys, yk, dy;
+		double m, w = 1.0 / m;
+		bool operator< (const edge& e) const {
+			return ys < e.ys;
+		}
+	};
+	QVector <edge> hrany(body.size());
+	int i, j, k;
+	for (i = 0; i < body.size(); i++) {									//vytvorim si pole hran, hrana bude zacinat v bode s mensim y
+		if (body[i].y() < body[(i + 1) % body.size()].y()) {
+			hrany[i].xs = body[i].x();
+			hrany[i].xk = body[(i + 1) % body.size()].x();
+			hrany[i].ys = body[i].y();
+			hrany[i].yk = body[(i + 1) % body.size()].y();
+
+		}
+		else {		//touto podmienkou odignoruje hrany so smernicou m=0
+			hrany[i].xk = body[i].x();
+			hrany[i].xs = body[(i + 1) % body.size()].x();
+			hrany[i].yk = body[i].y();
+			hrany[i].ys = body[(i + 1) % body.size()].y();
+		}
+		if (hrany[i].xk != hrany[i].xs) {
+			hrany[i].m = (hrany[i].yk - hrany[i].ys) / (double)(hrany[i].xk - hrany[i].xs);
+			hrany[i].w = 1.0 / hrany[i].m;
+		}
+		else
+			hrany[i].w = 0.0;
+		hrany[i].yk += -1;
+		hrany[i].dy = hrany[i].yk - hrany[i].ys;
+	}
+	for (i = 0; i < hrany.size(); i++) {							//vymazanie horizontalnych hran
+		if (hrany[i].dy < 0) {
+			hrany.removeAt(i);
+			i--;
+		}
+	}
+
+	for (int i = 0; i < hrany.size(); i++) {						//zoradi hrany podla y
+		for (int j = 0; j < hrany.size() - i - 1; j++) {
+			if (hrany[j + 1] < hrany[j]) {
+				edge temp = hrany[j];
+				hrany[j] = hrany[j + 1];
+				hrany[j + 1] = temp;
+			}
+		}
+	}
+
+	int Ymin = hrany[0].ys, Ymax = 0;								//nastavi Ymax, Ymin
+	for (i = 0; i < hrany.size(); i++) {
+		if (hrany[i].yk > Ymax)
+			Ymax = hrany[i].yk;
+	}
+
+	QVector<QList<edge>> TH;									//vytvori tabulku hran
+	TH.resize(Ymax - Ymin + 1);
+	for (i = 0; i < hrany.size(); i++) {
+		TH[hrany[i].ys - Ymin].push_back(hrany[i]);
+	}
+	/*
+   for (k = 0; k < TH.size(); k++) {
+	   for (i = 0; i < TH[k].size(); i++)
+		   qDebug() << TH[k][i].ys << TH[k][i].yk;
+   }*/
+
+	QList<edge> ZAH;
+	int y = Ymin;
+	//qDebug() << "IDEM DO CYKLUUUUUU";
+	for (i = 0; i < TH.size(); i++) {
+		if (!TH[i].isEmpty()) {														//aktivne hrany pre aktualny riadok presunie do zah
+			for (j = 0; j < TH[i].size(); j++) {
+				ZAH.push_back(TH[i][j]);
+			}
+		}
+
+		for (int i = 0; i < ZAH.size(); i++) {										//zoradi hrany podla x
+			for (int j = 0; j < ZAH.size() - i - 1; j++) {
+				if (ZAH[j + 1].xs < ZAH[j].xs) {
+					edge TempHrana = ZAH[j];
+					ZAH[j] = ZAH[j + 1];
+					ZAH[j + 1] = TempHrana;
+				}
+			}
+		}
+
+		for (j = 0; j < ZAH.size(); j += 2) {										//vykreslovanie
+			if ((int)ZAH[j].xs != (int)ZAH[j + 1].xs) {
+				for (k = 2; k < (int)ZAH[j + 1].xs - (int)ZAH[j].xs; k++) {
+					//setPixel((int)ZAH[j].xs + k, y, vypln);
+					setZbuff((int)ZAH[j].xs + k, y, vypln, z);
+				}
+			}
+		}
+
+		for (j = 0; j < ZAH.size(); j++) {											//zmazanie uz neaktivnych hran, posun o riadok
+			if (ZAH[j].dy == 0) {
+				ZAH.removeAt(j);
+				j--;
+			}
+			else {
+				ZAH[j].dy += -1;
+				ZAH[j].xs += ZAH[j].w;
+			}
+		}
+		y++;
 	}
 }
 
@@ -398,7 +516,7 @@ QColor ViewerWidget::nearest(int x, int y, QList<QPointF> body, QList<QColor> fa
 }
 
 QColor ViewerWidget::bary(int x, int y, QList<QPointF> body, QList<QColor> farby) {
-	float A, A0, A1, L0, L1, L2;
+	float A, A0, A1, L0, L1, L2, a;
 	float r1, r2, r3, g1, g2, g3, b1, b2, b3;
 	r1 = farby[0].red(); r2 = farby[1].red(); r3 = farby[2].red();
 	g1 = farby[0].green(); g2 = farby[1].green(); g3 = farby[2].green();
@@ -410,21 +528,44 @@ QColor ViewerWidget::bary(int x, int y, QList<QPointF> body, QList<QColor> farby
 	L0 = A0 / (double)A;
 	L1 = A1 / (double)A;
 	L2 = 1.0 - L1 - L0;
-	bary.setRed(L0 * r1 + L1 * r2 + L2 * r3);
-	bary.setGreen(L0 * g1 + L1 * g2 + L2 * g3);
-	bary.setBlue(L0 * b1 + L1 * b2 + L2 * b3);
+
+	a = L0 * r1 + L1 * r2 + L2 * r3;
+	if (a < 0)
+		bary.setRed(0);
+	else if (a > 255)
+		bary.setRed(255);
+	else 
+		bary.setRed(a);
+
+	a = L0 * g1 + L1 * g2 + L2 * g3;
+	if (a < 0)
+		bary.setGreen(0);
+	else if (a > 255)
+		bary.setGreen(255);
+	else
+		bary.setGreen(a);
+
+	a = L0 * b1 + L1 * b2 + L2 * b3;
+	if (a < 0)
+		bary.setBlue(0);
+	else if (a > 255)
+		bary.setBlue(255);
+	else
+		bary.setBlue(a);
 	return bary;
 }
 
 
-void ViewerWidget::kresliHedron(QList<QPointF> naVykreslenie, QList<int> nevykresluj, QList<QColor> farby, int algovypln) {
+void ViewerWidget::kresliHedron(QList<QPointF> naVykreslenie, QList<int> nevykresluj, QList<QColor> farby, int algovypln, QList<double> Zsur) {
 	img->fill(Qt::white);
-	qDebug() << naVykreslenie.size() << farby.size();
+	//qDebug() << naVykreslenie.size() << farby.size();
 	update();
+	resetZbuff();
 	int i, k;
 	int w = img->width();
 	int h = img->height();
 	bool nekresli = false;
+	double z;
 	QList<QPointF> W, V;
 	QList<QColor> farby3;
 	for (i = 0; i < naVykreslenie.size(); i += 3) {
@@ -435,6 +576,7 @@ void ViewerWidget::kresliHedron(QList<QPointF> naVykreslenie, QList<int> nevykre
 			}
 		}
 		if (!nekresli) {
+			z = Zsur[i / 3];
 			farby3.clear();
 			farby3.append(farby[i]);
 			farby3.append(farby[i+1]);
@@ -480,7 +622,7 @@ void ViewerWidget::kresliHedron(QList<QPointF> naVykreslenie, QList<int> nevykre
 				W.clear();
 			}
 			for (i = 0; i < V.size(); i++) {
-				qDebug() << V.size();
+				//qDebug() << V.size();
 				A.setX(V[i].x());
 				A.setY(V[i].y());
 				B.setX(V[(i + 1) % (V.size())].x());
@@ -489,11 +631,56 @@ void ViewerWidget::kresliHedron(QList<QPointF> naVykreslenie, QList<int> nevykre
 					usecka_DDA(A, B, Qt::black);
 			}
 			if (V.size() == 3)
-				scanLineTri(V, Qt::black, algovypln, farby3);
+				scanLineTri(V, algovypln, farby3, z);
+			else if (V.size()>3){				//ak je sfera orezana a vznikol mnohouholnik, ten vyplnim cely farbou jedneho z vrcholov
+				scanLine(V, farby3[0], z);
+			}
+		}
+		kresliZbuff();
+	}
+	update();
+}
+
+void ViewerWidget::resetZbuff() {
+	int i, j;
+	buffer.resize(500);
+	for (i = 0; i < 500; i++) 
+		buffer[i].resize(500);
+	qDebug() << buffer.size() << buffer[499].size();
+
+	for (i = 0; i < buffer.size(); i++) {
+		for (j = 0; j < buffer[i].size(); j++) {
+			buffer[i][j].farbaPixelu.setRed(255); 
+			buffer[i][j].farbaPixelu.setGreen(255); 
+			buffer[i][j].farbaPixelu.setBlue(255);
+			//buf[i][j].z = INTMAX_MIN;
+			buffer[i][j].z = -74237489;
+			if (i == 499 && j == 499)
+				qDebug() << i << j << buffer[i][j].z;
+		}
+	}
+	qDebug() << "resetlo sa";
+}
+
+void ViewerWidget::setZbuff(int x, int y, QColor farba, double z) {
+	if (z > buffer[x][y].z) {
+		buffer[x][y].z = z;
+		buffer[x][y].farbaPixelu = QColor(farba);
+	}
+}
+
+void ViewerWidget::kresliZbuff() {
+	int i, j;
+	img->fill(Qt::white);
+	update();
+	for (i = 0; i < img->width(); i++) {
+		for (j = 0; j < img->height(); j++) {
+			setPixel(i, j, buffer[i][j].farbaPixelu);
 		}
 	}
 	update();
 }
+
 
 //Slots
 void ViewerWidget::paintEvent(QPaintEvent* event)
