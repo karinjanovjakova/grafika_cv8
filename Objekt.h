@@ -40,8 +40,8 @@ public:
 	void setY(double surY) { y = surY; };
 	void setZ(double surZ) { z = surZ; };
 	void setNormala() {
-		double dlzka = sqrt(x * x + y * y + z * z);
-		normala.setAll(x / dlzka, y / dlzka, z / dlzka);
+		double d = sqrt(x * x + y * y + z * z);
+		normala.setAll(x / d, y / d, z / d);
 	};
 	void setFarba(int r, int g, int b) { farba.setRed(r); farba.setGreen(g); farba.setBlue(b); };
 	void setFarba(QColor f) { farba = f; };

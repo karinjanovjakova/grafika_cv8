@@ -346,6 +346,12 @@ void ImageViewer::on_generuj_clicked() {
 }
 
 void ImageViewer::on_rozdel_clicked() {
+	if (octa.HisEmpty()) {
+		msgBox.setText(u8"Útvar je prázdny.");
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.exec();
+		return;
+	}
 	QList<Vertex>* Vrcholy = octa.getVrcholy();
 	QList<H_Edge>* Polohrany = octa.getHrany();
 	QList<Face>* Steny = octa.getSteny();
@@ -738,21 +744,24 @@ void ImageViewer::prepocitajSuradnice() {
 	getCurrentViewerWidget()->kresliHedron(naVykreslenie, nevykresluj, farby, ui->algo->currentIndex(), zSur);
 }
 
-void ImageViewer::suradniceRovnobezne() {
+void ImageViewer::suradniceRovnobezne() {				
 	qDebug() << "snaha rovnobezne";
 	naVykreslenie.clear();
 	farby.clear();
 	zSur.clear();
 	nevykresluj.clear();
 	QVector<double> surZ(3);
+	QList<Vertex>* vrch = octa.getVrcholy();
+	Vertex vrchol;
+	QPointF bod;
 	double a = kamera.getnx(), b = kamera.getny(), c = kamera.getnz();
 	double ux = kamera.getux(), uy = kamera.getuy(), uz = kamera.getuz();
 	double vx = kamera.getvx(), vy = kamera.getvy(), vz = kamera.getvz();
 	double stareX, stareY, stareZ, x, z, y, xx, yy, dist, pomocna;
 	int zoom = ui->zoom->value();
-	QPointF bod;
 	for (int i = 0; i < octa.getStenysize(); i++){
 		//bod1
+		vrchol = *(octa.getStena(i)->getEdge()->getVertexO());
 		stareX = octa.getStena(i)->getEdge()->getVertexO()->getX();
 		stareY = octa.getStena(i)->getEdge()->getVertexO()->getY();
 		stareZ = octa.getStena(i)->getEdge()->getVertexO()->getZ();
@@ -772,9 +781,10 @@ void ImageViewer::suradniceRovnobezne() {
 		bod.setX(zoom * xx + getCurrentViewerWidget()->getImgWidth() / 2 + ui->horizontalSlider->value());
 		bod.setY(zoom * yy + getCurrentViewerWidget()->getImgHeight() / 2 - ui->verticalSlider->value());
 		naVykreslenie.append(bod);
-		farby.append(octa.getStena(i)->getEdge()->getVertexO()->getFarba());
+		farby.append((*vrch)[vrchol.getIndex()].getFarba());
 
 		//bod2
+		vrchol = *(octa.getStena(i)->getEdge()->getHrana_next()->getVertexO());
 		stareX = octa.getStena(i)->getEdge()->getHrana_next()->getVertexO()->getX();
 		stareY = octa.getStena(i)->getEdge()->getHrana_next()->getVertexO()->getY();
 		stareZ = octa.getStena(i)->getEdge()->getHrana_next()->getVertexO()->getZ();
@@ -794,9 +804,10 @@ void ImageViewer::suradniceRovnobezne() {
 		bod.setX(zoom * xx + getCurrentViewerWidget()->getImgWidth() / 2 + ui->horizontalSlider->value());
 		bod.setY(zoom * yy + getCurrentViewerWidget()->getImgHeight() / 2 - ui->verticalSlider->value());
 		naVykreslenie.append(bod);
-		farby.append(octa.getStena(i)->getEdge()->getHrana_next()->getVertexO()->getFarba());
+		farby.append((*vrch)[vrchol.getIndex()].getFarba());
 
 		//bod3
+		vrchol = *(octa.getStena(i)->getEdge()->getHrana_prev()->getVertexO());
 		stareX = octa.getStena(i)->getEdge()->getHrana_next()->getHrana_next()->getVertexO()->getX();
 		stareY = octa.getStena(i)->getEdge()->getHrana_next()->getHrana_next()->getVertexO()->getY();
 		stareZ = octa.getStena(i)->getEdge()->getHrana_next()->getHrana_next()->getVertexO()->getZ();
@@ -816,7 +827,7 @@ void ImageViewer::suradniceRovnobezne() {
 		bod.setX(zoom * xx + getCurrentViewerWidget()->getImgWidth() / 2 + ui->horizontalSlider->value());
 		bod.setY(zoom * yy + getCurrentViewerWidget()->getImgHeight() / 2 - ui->verticalSlider->value());
 		naVykreslenie.append(bod);
-		farby.append(octa.getStena(i)->getEdge()->getHrana_next()->getHrana_next()->getVertexO()->getFarba());
+		farby.append((*vrch)[vrchol.getIndex()].getFarba());
 		if (surZ[0] > surZ[1])		// najdem navyssiu z suradnicu a do Z-bufferu ju zapisem vramci celeho trojuholnika resp n-uholnika aby mi nebezali vypocty pre kazdy pixel
 			pomocna = surZ[0];
 		else
@@ -833,6 +844,8 @@ void ImageViewer::suradniceStredove() {
 	farby.clear();
 	zSur.clear();
 	nevykresluj.clear();
+	QList<Vertex>* vrch = octa.getVrcholy();
+	Vertex vrchol;
 	double a = kamera.getnx(), b = kamera.getny(), c = kamera.getnz();
 	double stareX, stareY, stareZ, x, z, y, xx, yy, Sx, Sy, Sz, t, dist;
 	double ux = kamera.getux(), uy = kamera.getuy(), uz = kamera.getuz();
@@ -845,6 +858,7 @@ void ImageViewer::suradniceStredove() {
 	Sz = s * c;
 	for (int i = 0; i < octa.getStenysize(); i++) {
 		//bod1
+		vrchol = *(octa.getStena(i)->getEdge()->getVertexO());
 		stareX = octa.getStena(i)->getEdge()->getVertexO()->getX();
 		stareY = octa.getStena(i)->getEdge()->getVertexO()->getY();
 		stareZ = octa.getStena(i)->getEdge()->getVertexO()->getZ();
@@ -865,9 +879,10 @@ void ImageViewer::suradniceStredove() {
 		bod.setX(zoom * xx + getCurrentViewerWidget()->getImgWidth() / 2 + ui->horizontalSlider->value());
 		bod.setY(zoom * yy + getCurrentViewerWidget()->getImgHeight() / 2 - ui->verticalSlider->value());
 		naVykreslenie.append(bod);
-		farby.append(octa.getStena(i)->getEdge()->getVertexO()->getFarba());
+		farby.append((*vrch)[vrchol.getIndex()].getFarba());
 
 		//bod2
+		vrchol = *(octa.getStena(i)->getEdge()->getHrana_next()->getVertexO());
 		stareX = octa.getStena(i)->getEdge()->getHrana_next()->getVertexO()->getX();
 		stareY = octa.getStena(i)->getEdge()->getHrana_next()->getVertexO()->getY();
 		stareZ = octa.getStena(i)->getEdge()->getHrana_next()->getVertexO()->getZ();
@@ -887,9 +902,10 @@ void ImageViewer::suradniceStredove() {
 		bod.setX(zoom * xx + getCurrentViewerWidget()->getImgWidth() / 2 + ui->horizontalSlider->value());
 		bod.setY(zoom * yy + getCurrentViewerWidget()->getImgHeight() / 2 - ui->verticalSlider->value());
 		naVykreslenie.append(bod);
-		farby.append(octa.getStena(i)->getEdge()->getHrana_next()->getVertexO()->getFarba());
+		farby.append((*vrch)[vrchol.getIndex()].getFarba());
 
 		//bod3
+		vrchol = *(octa.getStena(i)->getEdge()->getHrana_prev()->getVertexO());
 		stareX = octa.getStena(i)->getEdge()->getHrana_next()->getHrana_next()->getVertexO()->getX();
 		stareY = octa.getStena(i)->getEdge()->getHrana_next()->getHrana_next()->getVertexO()->getY();
 		stareZ = octa.getStena(i)->getEdge()->getHrana_next()->getHrana_next()->getVertexO()->getZ();
@@ -909,7 +925,7 @@ void ImageViewer::suradniceStredove() {
 		bod.setX(zoom * xx + getCurrentViewerWidget()->getImgWidth() / 2 + ui->horizontalSlider->value());
 		bod.setY(zoom * yy + getCurrentViewerWidget()->getImgHeight() / 2 - ui->verticalSlider->value());
 		naVykreslenie.append(bod);
-		farby.append(octa.getStena(i)->getEdge()->getHrana_next()->getHrana_next()->getVertexO()->getFarba());
+		farby.append((*vrch)[vrchol.getIndex()].getFarba());
 	}
 } 
 
@@ -933,6 +949,7 @@ void ImageViewer::farbyCalc() {
 	for (i = 0; i < octa.getVrcholysize(); i++) {
 		//vektor N
 		N = (*Vrcholy)[i].getNormala();
+		N.setAll(-N.getX(), -N.getY(), -N.getZ());
 		//vypocet V pri stredovom premietani
 		if (ui->comboBox->currentIndex() == 1) {		
 			pomocny.setAll(kamera.getnx() * ui->spinBox_3->value(), kamera.getny() * ui->spinBox_3->value(), kamera.getnz() * ui->spinBox_3->value());
@@ -977,7 +994,7 @@ void ImageViewer::farbyCalc() {
 														qDebug() << "Id " << Id;
 														qDebug() << "Ia " << Ia;*/
 		//vypocet I
-		a = Ia.redF() + Id.redF() + Is.redF();
+		a = Ia.redF() + Id.redF() + Is.redF();			//qDebug() << a;
 		if (a < 0)
 			I.setRed(0);
 		else if (a > 255)
@@ -1002,57 +1019,136 @@ void ImageViewer::farbyCalc() {
 														//qDebug()<<"vysledne I" << I;
 	}
 	octa.setVrcholy(Vrcholy);
-	QList<Vertex>* vrch=octa.getVrcholy();
+	QList<Vertex>* vrch=octa.getVrcholy();				//kontrola, ci sa naozaj farby zapisali
 	for (i = 0; i < octa.getVrcholysize(); i++) {
 		//qDebug() << (*vrch)[i].getFarba();
 	}
 }
 
 void ImageViewer::on_zoom_valueChanged(int i) {
-	prepocitajSuradnice();
+	if (octa.HisEmpty()) {
+		msgBox.setText(u8"Útvar je prázdny.");
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.exec();
+		return;
+	}
+	else
+		prepocitajSuradnice();
 }
 
 void ImageViewer::on_azimut_valueChanged(int i) {
-	prepocitajSuradnice();
+	if (octa.HisEmpty()) {
+		msgBox.setText(u8"Útvar je prázdny.");
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.exec();
+		return;
+	}
+	else
+		prepocitajSuradnice();
 }
 
 void ImageViewer::on_zenit_valueChanged(int i) {
-	prepocitajSuradnice();
+	if (octa.HisEmpty()) {
+		msgBox.setText(u8"Útvar je prázdny.");
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.exec();
+		return;
+	}
+	else
+		prepocitajSuradnice();
 }
 
 void ImageViewer::on_horizontalSlider_valueChanged(int i) {
-	prepocitajSuradnice();
+	if (octa.HisEmpty()) {
+		msgBox.setText(u8"Útvar je prázdny.");
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.exec();
+		return;
+	}
+	else
+		prepocitajSuradnice();
 }
 
 void ImageViewer::on_verticalSlider_valueChanged(int i) {
-	prepocitajSuradnice();
+	if (octa.HisEmpty()) {
+		msgBox.setText(u8"Útvar je prázdny.");
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.exec();
+		return;
+	}
+	else
+		prepocitajSuradnice();
 }
 
 void ImageViewer::on_comboBox_currentIndexChanged(int index) {
-	kamera.setTyp(index);
-	prepocitajSuradnice();
+	if (octa.HisEmpty()) {
+		msgBox.setText(u8"Útvar je prázdny.");
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.exec();
+		return;
+	}
+	else {
+		kamera.setTyp(index);
+		prepocitajSuradnice();
+	}
 }
 
 void ImageViewer::on_spinFar_valueChanged(int i) {
-	kamera.setFar(i);
-	prepocitajSuradnice();
+	if (octa.HisEmpty()) {
+		msgBox.setText(u8"Útvar je prázdny.");
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.exec();
+		return;
+	}
+	else {
+		kamera.setFar(i);
+		prepocitajSuradnice();
+	}
 }
 
 void ImageViewer::on_spinNear_valueChanged(int i) {
-	kamera.setNear(i);
-	prepocitajSuradnice();
+	if (octa.HisEmpty()) {
+		msgBox.setText(u8"Útvar je prázdny.");
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.exec();
+		return;
+	}
+	else {
+		kamera.setNear(i);
+		prepocitajSuradnice();
+	}
 }
 
 void ImageViewer::on_spinBox_3_valueChanged(int i) {
-	prepocitajSuradnice();
+	if (octa.HisEmpty()) {
+		msgBox.setText(u8"Útvar je prázdny.");
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.exec();
+		return;
+	}
+	else
+		prepocitajSuradnice();
 }
 
 void ImageViewer::on_pushButton_clicked() {
-	
-	prepocitajSuradnice();
+	if (octa.HisEmpty()) {
+		msgBox.setText(u8"Útvar je prázdny.");
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.exec();
+		return;
+	}
+	else
+		prepocitajSuradnice();
 }
 
 void ImageViewer::on_algo_currentIndexChanged(int i) {
-	prepocitajSuradnice();
+	if (octa.HisEmpty()) {
+		msgBox.setText(u8"Útvar je prázdny.");
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.exec();
+		return;
+	}
+	else
+		prepocitajSuradnice();
 }
 
