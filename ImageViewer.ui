@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1500</width>
-    <height>1201</height>
+    <width>1800</width>
+    <height>1000</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -83,6 +83,9 @@
             <property name="maximum">
              <number>500</number>
             </property>
+            <property name="value">
+             <number>200</number>
+            </property>
            </widget>
           </item>
           <item>
@@ -142,6 +145,9 @@
             </property>
             <property name="maximum">
              <number>500</number>
+            </property>
+            <property name="value">
+             <number>50</number>
             </property>
            </widget>
           </item>
@@ -349,6 +355,9 @@
               <property name="maximum">
                <number>255</number>
               </property>
+              <property name="value">
+               <number>250</number>
+              </property>
              </widget>
             </item>
             <item>
@@ -356,12 +365,18 @@
               <property name="maximum">
                <number>255</number>
               </property>
+              <property name="value">
+               <number>250</number>
+              </property>
              </widget>
             </item>
             <item>
              <widget class="QSpinBox" name="f1b">
               <property name="maximum">
                <number>255</number>
+              </property>
+              <property name="value">
+               <number>90</number>
               </property>
              </widget>
             </item>
@@ -394,6 +409,9 @@
               <property name="maximum">
                <number>255</number>
               </property>
+              <property name="value">
+               <number>250</number>
+              </property>
              </widget>
             </item>
             <item>
@@ -401,12 +419,18 @@
               <property name="maximum">
                <number>255</number>
               </property>
+              <property name="value">
+               <number>90</number>
+              </property>
              </widget>
             </item>
             <item>
              <widget class="QSpinBox" name="f2b">
               <property name="maximum">
                <number>255</number>
+              </property>
+              <property name="value">
+               <number>250</number>
               </property>
              </widget>
             </item>
@@ -439,6 +463,9 @@
               <property name="maximum">
                <double>1.000000000000000</double>
               </property>
+              <property name="value">
+               <double>1.000000000000000</double>
+              </property>
              </widget>
             </item>
             <item>
@@ -446,11 +473,17 @@
               <property name="maximum">
                <double>1.000000000000000</double>
               </property>
+              <property name="value">
+               <double>1.000000000000000</double>
+              </property>
              </widget>
             </item>
             <item>
              <widget class="QDoubleSpinBox" name="f3b">
               <property name="maximum">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="value">
                <double>1.000000000000000</double>
               </property>
              </widget>
@@ -482,6 +515,9 @@
             <item>
              <widget class="QDoubleSpinBox" name="f4r">
               <property name="maximum">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="value">
                <double>1.000000000000000</double>
               </property>
              </widget>
@@ -529,6 +565,9 @@
               <property name="maximum">
                <double>1.000000000000000</double>
               </property>
+              <property name="value">
+               <double>1.000000000000000</double>
+              </property>
              </widget>
             </item>
             <item>
@@ -541,6 +580,9 @@
             <item>
              <widget class="QDoubleSpinBox" name="odrazB">
               <property name="maximum">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="value">
                <double>1.000000000000000</double>
               </property>
              </widget>
@@ -612,6 +654,19 @@
           </property>
          </item>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_5">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -787,6 +842,19 @@
              </property>
             </widget>
            </item>
+           <item>
+            <spacer name="verticalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
           </layout>
          </item>
          <item>
@@ -815,19 +883,6 @@
          </item>
         </layout>
        </item>
-       <item>
-        <spacer name="verticalSpacer_4">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
       </layout>
      </widget>
     </item>
@@ -851,7 +906,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1500</width>
+     <width>1800</width>
      <height>22</height>
     </rect>
    </property>
