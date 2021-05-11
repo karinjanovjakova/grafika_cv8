@@ -501,7 +501,7 @@ void ViewerWidget::scanLine(QList <QPointF> body, QColor vypln, double z) {
 QColor ViewerWidget::nearest(int x, int y, QList<QPointF> body, QList<QColor> farby) {
 	int i, j;
 	QColor c1(255, 0, 0), c2(0, 255, 0), c3(0, 0, 255);
-	c1 = farby[2]; c2 = farby[1]; c3 = farby[0];
+	c1 = farby[0]; c2 = farby[1]; c3 = farby[2];
 	float d0, d1, d2;
 	d0 = sqrt((x - body[0].x()) * (x - body[0].x()) + (y - body[0].y()) * (y - body[0].y()));
 	d1 = sqrt((x - body[1].x()) * (x - body[1].x()) + (y - body[1].y()) * (y - body[1].y()));
